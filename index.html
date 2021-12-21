@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title></title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Overpass:wght@300;400;500&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+    <style>
+    *
+    {
+        margin: 0;
+        padding: 0;
+    }
+
+    html,
+    body
+    {
+        overflow: hidden;
+      font-family: 'Roboto Mono', monospace;
+    }
+
+    .webgl
+    {
+        position: fixed;
+        top: 0;
+        left: 0;
+        outline: none;
+    }
+
+    .container{
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      color: white;
+      height: 200px;
+      display: flex;
+      justify-content: space-evenly;
+      align-items: center;
+      flex-direction: column;
+    }
+.links{
+  display: flex;
+  justify-content: space-evenly;
+  align-items: center;
+  flex-direction: column;
+  height: 100%;
+}
+a {
+  text-decoration: none;
+  color: white;
+  cursor: pointer;
+  transition: all ease 0.25s;
+}
+a:hover{
+  color: #7dbfb6;
+}
+    </style>
+  </head>
+  <body>
+    <canvas class="webgl"></canvas>
+    <div class="container">
+      <div class="header">
+        <h1>stevedsimkins.eth</h1>
+      </div>
+      <div class="links">
+        <h3 class="link"><a href="https://twitter.com/stevedsimkins/" target="_blank">Twitter</a></h3>
+        <h3 class="link"><a href="https://stevedsimkins.dev/" target="_blank">Portfolio</a></h3>
+        <h3 class="link"><a href="https://stevedsimkins.blog/" target="_blank">Blog</a></h3>
+      </div>
+    </div>
+  </body>
+  <script src="https://gateway.pinata.cloud/ipfs/QmQhg714sYRJyEr3vDZJiufwJQoxCERwifRvkgHjrTHN5a"></script>
+  <script src="https://gateway.pinata.cloud/ipfs/Qmf62GZ2WdWAWNaJfiHw6fYYum1BAJAHiaJEvyRcsvi12m"></script>
+  <script>
+
+    // Canvas
+    const canvas = document.querySelector('canvas.webgl')
+
+    // Scene
+    const scene = new THREE.Scene()
+
+    /**
+     * Textures
+     */
+    const textureLoader = new THREE.TextureLoader()
+
+    /**
+     * Test cube
+     */
+    // const cube = new THREE.Mesh(
+    //   new THREE.BoxGeometry(1, 1, 1),
+    //   new THREE.MeshBasicMaterial({ wireframe: true})
+    // )
+    // scene.add(cube)
+
+    const coneMaterial = new THREE.MeshStandardMaterial({ wireframe: true})
+
+    // Top Pyramid 
+    const topCone = new THREE.Mesh(
+      new THREE.ConeGeometry(0.75, 1.75, 4),
+      coneMaterial
+    )
+    const bottomCone = new THREE.Mesh(
+      new THREE.ConeGeometry(0.75, 1, 4),
+      coneMaterial
+    )
+    bottomCone.position.y = - 1.5
+    bottomCone.rotation.x = Math.PI * 1
+
+    // Ethereum 
+    const ethereum = new THREE.Group()
+    ethereum.add(topCone)
+    ethereum.add(bottomCone)
+    ethereum.position.y = 0.5
+    scene.add(ethereum)
+
+    //Lights 
+    const rectAreaLight1 = new THREE.RectAreaLight("#B049FF", 1.25, 2, 3)
+    rectAreaLight1.position.x = - 0.75
+    rectAreaLight1.rotation.y = Math.PI * 1.5
+    scene.add(rectAreaLight1)
+
+    const rectAreaLight2 = new THREE.RectAreaLight("#fe99cd", 1.25, 2, 3)
+    rectAreaLight2.position.x = 1
+    rectAreaLight2.rotation.x = Math.PI * 0.5
+    rectAreaLight2.rotation.y = Math.PI * - 1.5
+    scene.add(rectAreaLight2)
+
+    const rectAreaLight3 = new THREE.RectAreaLight("#a4fcf5", 1.25, 2, 3)
+    rectAreaLight3.position.y = - 2
+    rectAreaLight3.rotation.x = Math.PI * 0.50
+    scene.add(rectAreaLight3)
+
+    /**
+     * Sizes
+     */
+    const sizes = {
+        width: window.innerWidth,
+        height: window.innerHeight
+    }
+
+    window.addEventListener('resize', () =>
+    {
+        // Update sizes
+        sizes.width = window.innerWidth
+        sizes.height = window.innerHeight
+
+        // Update camera
+        camera.aspect = sizes.width / sizes.height
+        camera.updateProjectionMatrix()
+
+        // Update renderer
+        renderer.setSize(sizes.width, sizes.height)
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
+    })
+
+    /**
+     * Camera
+     */
+    // Base camera
+    const camera = new THREE.PerspectiveCamera(75, sizes.width / sizes.height, 0.1, 100)
+    camera.position.z = 3
+    scene.add(camera)
+
+    // Controls
+    const controls = new THREE.OrbitControls(camera, canvas)
+    controls.enableDamping = true
+
+    /**
+     * Renderer
+     */
+    const renderer = new THREE.WebGLRenderer({
+        canvas: canvas
+    })
+    renderer.setSize(sizes.width, sizes.height)
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
+    renderer.setClearColor('#222222')
+
+    /**
+     * Animate
+     */
+    const clock = new THREE.Clock()
+
+    const tick = () =>
+    {
+        const elapsedTime = clock.getElapsedTime()
+
+        // Update controls
+        controls.update()
+        ethereum.rotation.y = elapsedTime / 1.75
+        // cube.rotation.x = elapsedTime
+
+        // Render
+        renderer.render(scene, camera)
+
+        // Call tick again on the next frame
+        window.requestAnimationFrame(tick)
+    }
+
+    tick()
+
+
+  </script>
+</html>
